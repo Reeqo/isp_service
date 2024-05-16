@@ -44,7 +44,7 @@ def driver_start():
     """
     chrome driver launching func
     """
-    s = Service(executable_path='/chromedriver-win64/chromedriver.exe')  # /usr/bin/chromedriver for linux cli
+    s = Service(executable_path='chromedriver-win64/chromedriver.exe')  # /usr/bin/chromedriver for linux cli
     driver = webdriver.Chrome(service=s)  # +options=options if linux cli
     driver.set_window_size(1920, 1080)
     driver.maximize_window()
@@ -125,14 +125,14 @@ async def add_service(message: types.Message, command=CommandObject):
     else:
         return
     tv = "IPTV Расширенный XL"  # stating default TV plan
-    input_list = command.args.split(" ")  # 0 - mac/tv/camera, 1 - ssv, 2 - mac/camera address if applicable
 
     if command.args is None:
-        await message.answer("Ошибка: не введен MAC или SSV\n" \
-                             "Введите команду в формате \n/add mac ssv00000 00:00:00:00:00:00" \
-                             "\nИли \n/add tv ssv00000")
+        await bot.send_message(message.from_user.id, "Ошибка: не введен MAC или SSV\n" \
+                                                     "Введите команду в формате \n/add mac ssv00000 00:00:00:00:00:00" \
+                                                     "\nИли \n/add tv ssv00000")
 
     else:
+        input_list = command.args.split(" ")  # 0 - mac/tv/camera, 1 - ssv, 2 - mac/camera address if applicable
         try:
             driver = driver_start()
             driver.get(BILLING_URL)
@@ -238,7 +238,7 @@ async def add(message: types.Message, command=CommandObject):
     password_input.send_keys(STALKER_PASSWORD)
     password_input.send_keys(Keys.ENTER)
     search = driver.find_element(By.NAME, 'search')
-    search.send_keys(input_list[0])
+    search.send_keys(format_mac(input_list[0], delim=':'))
     search.send_keys(Keys.ENTER)
     driver.find_element(By.XPATH, '//a[contains(.,"del")]').click()
     driver.switch_to.alert.accept()
