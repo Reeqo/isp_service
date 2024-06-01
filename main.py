@@ -127,6 +127,7 @@ async def add_service(message: types.Message, command=CommandObject):
     tv = "IPTV Расширенный XL"  # stating default TV plan
 
     if command.args is None:
+        print("Аргументов нет")
         await bot.send_message(message.from_user.id, "Ошибка: не введен MAC или SSV\n" \
                                                      "Введите команду в формате \n/add mac ssv00000 00:00:00:00:00:00" \
                                                      "\nИли \n/add tv ssv00000")
