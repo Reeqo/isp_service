@@ -129,10 +129,13 @@ async def command_start(message: types.Message, state: FSMContext) -> None:
 @dp.message(User.ssv)
 async def process_ssv(message: types.Message, state: FSMContext) -> None:
     text = f'Выбран ssv{message.text}'
-    if await log_cmd(message=message, text=text) == 0:
+    if await log_cmd(message=message, text=text) == 0 and len(message.text) == 5 and message.text.isdigit():
         pass
     else:
+        await bot.send_message(message.from_user.id, 'Неверный ssv, введите номер абонента без букв (прим. 12345)')
+        await state.set_state(User.ssv)
         return
+
     await state.update_data(ssv='ssv' + message.text.lower())
     user_data = await state.get_data()
     await state.set_state(User.action)
