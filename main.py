@@ -33,21 +33,12 @@ dp = Dispatcher()
 options for linux cli headless mode 
 '''
 
+
 # options = webdriver.ChromeOptions()
 # options.add_argument('--disable-gpu')
 # options.add_argument('--headless')
 # options.add_argument("--disable-dev-shm-usage")
 # options.add_argument("--no-sandbox")
-
-
-def search_input(input_var, driver):  # billing search func
-    driver.find_element(By.CLASS_NAME, 'search-query').clear()
-    search_form = driver.find_element(By.CLASS_NAME, 'search-query')
-    search_form.send_keys(input_var)
-    time.sleep(3)  # sleep to avoid search stacking
-    search_form.send_keys(Keys.ARROW_DOWN)
-    search_form.send_keys(Keys.ARROW_DOWN)
-    driver.find_element(By.XPATH, '//li[contains(@class,"item ui-menu-item focused")]').click()
 
 
 def driver_start():
@@ -59,6 +50,16 @@ def driver_start():
     driver.set_window_size(1920, 1080)
     driver.maximize_window()
     return driver
+
+
+def search_input(input_var, driver):  # billing search func
+    driver.find_element(By.CLASS_NAME, 'search-query').clear()
+    search_form = driver.find_element(By.CLASS_NAME, 'search-query')
+    search_form.send_keys(input_var)
+    time.sleep(3)  # sleep to avoid search stacking
+    search_form.send_keys(Keys.ARROW_DOWN)
+    search_form.send_keys(Keys.ARROW_DOWN)
+    driver.find_element(By.XPATH, '//li[contains(@class,"item ui-menu-item focused")]').click()
 
 
 def driver_hydra(driver):
@@ -142,8 +143,10 @@ async def process_ssv(message: types.Message, state: FSMContext) -> None:
     driver = driver_start()
     driver_hydra(driver)
     search_input(user_data['ssv'], driver)
-    address = 'empty'
-    ip = 'empty'
+    address = 'Не определен'
+    ip = 'Не определен'
+    balance = 'Не определен'
+    service = 'Услуги не определены'
     try:
         address = driver.find_element(By.XPATH,
                                       '//tr//tr//tr[@class="" and contains(.,"Обычный адрес (основной)")]//td['
@@ -151,13 +154,22 @@ async def process_ssv(message: types.Message, state: FSMContext) -> None:
         ip = driver.find_element(By.XPATH,
                                  '//tr//tr//tr[@class="" and contains(.,"IP-адрес (основной)")]//td[contains(.,'
                                  '"10.2")][1]').text
-    except:
-        pass
+        driver.find_element(By.XPATH, '//span[contains(@id,"_n_owner_id_edit_")]').click()
+        time.sleep(4)
+        driver.switch_to.window(driver.window_handles.pop())
+        balance = driver.find_element(By.XPATH, '//td[contains(@class,"align_right")][1]').text
+        service = driver.find_element(By.XPATH, '//i[contains(@class,"icon-large")][1]').get_attribute('data-original'
+                                                                                                       '-title')
+    except Exception as ex:
+        await bot.send_message(message.from_user.id, f'{ex}')
+    mark = '\u2705' if 'Услуга' in service else '\u274C'
     await message.answer(
         f"Выбран абонент с ssv{message.text}!\n"
         f"Адрес: {address}\n"
+        f"Баланс: {balance}руб\n"
         f"IP-адрес: {ip}\n"
-        f"Выберите действие?",
+        f"{mark}{service}\n"
+        f"Выберите действие:",
         reply_markup=ReplyKeyboardMarkup(
             keyboard=[
                 [
