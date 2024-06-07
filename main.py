@@ -120,6 +120,10 @@ async def send_welcome(message: types.Message):
 
 @dp.message(StateFilter(None), Command(commands=["user"]))
 async def command_start(message: types.Message, state: FSMContext) -> None:
+    if await log_cmd(message=message, text=message.text, user=USERS) == 0:
+        pass
+    else:
+        return
     await state.set_state(User.ssv)
     await message.answer(
         "\nВведите ssv абонента чтобы начать",
@@ -191,13 +195,9 @@ async def faq(message: types.Message):
         pass
     else:
         return
-    await message.reply("Чтобы добавить мак введи " \
-                        "\n/add mac ssv00000 00:00:00:00:00:00" \
-                        "\nЧтобы дернуть ТВ введи " \
-                        "\n/add tv ssv00000" \
-                        "\nЧтобы добавить камеры введи" \
-                        "\n/add camera ssv00000 16А-67 (в адресе русские буквы)" \
-                        "\n/deltv 00:00:00:00:00:00 Если нет видеоклуба")
+    await message.reply("Для начала работы выбери в меню команду /user или напиши её в чат \nДоступные функции: \nМАК "
+                        "- Добавить mac роутера\nТВ - активировать услугу ТВ\n Камеры - добавить камеры по"
+                        "адресу\n Удалить - удалить БУ приставку по mac\nЗавершить - прекратить работу по этому ssv")
 
 
 '''
